@@ -1,5 +1,5 @@
 from pgmpy.models import BayesianNetwork
-from pgmpy.estimators import MaximumLikelihoodEstimator,HillClimbSearch,BayesianEstimator
+from pgmpy.estimators import MaximumLikelihoodEstimator,HillClimbSearch,BayesianEstimator,TreeSearch
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, ConfusionMatrixDisplay
@@ -8,23 +8,30 @@ from sklearn.tree import export_graphviz
 from IPython.display import Image
 import graphviz
 import tensorflow as tf
-import tensorflow as tf
 from tensorflow import keras
 from keras import Sequential
 from keras.layers import Flatten, Dense, Dropout, BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
+from hampel import hampel
+import networkx as nx
+import matplotlib.pyplot as plt
 
 ##Bayesian NetWork Creation
-def bay_net_structure(data,k):
+def bay_net_structure(data):
     #data_2d=data.reshape(-1, 6)
-    #data_2d=pd.DataFrame(data,columns=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z'])
-    data=data[['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z','label']]
-    hc = HillClimbSearch(data[0:k])
-    best_model = hc.estimate()
+    #data_2d=pd.DataFrame(data_2d,columns=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z'])
+    #print(data_2d.shape)
+    data=data[['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']]
+    est = HillClimbSearch(data)
 
-    print("Edges of the learned Bayesian network:")
-    print(best_model.edges())
+    model = est.estimate(scoring_method='k2score',max_indegree=2,epsilon=0.001)
+    print(model.edges())
+    model = BayesianNetwork(model.edges())
+    model.fit(data)
+    print(model.get_cpds())
+
+
 
 
 #Random Forest Algorithm
