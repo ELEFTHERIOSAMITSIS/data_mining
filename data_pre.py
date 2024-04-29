@@ -62,15 +62,17 @@ def normal_data_MinMax(df):
 
 
 def rolling_means(df,k=20):
-    df=df.rolling(k).mean()
-    new_df=df[k-1:]
+    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
+    df[cols].rolling(k).mean()
+    new_df=df[k-1:].reset_index(drop=True)
     return new_df
 
 
 
-def pca_test(df):
-    pca = PCA(n_components=3)
+def pca_test(df,components=3):
+    pca = PCA(n_components=components)
     principal_components = pca.fit_transform(df)
+    return principal_components
 
 def get_balanced_dataset(df,k=7000):
     balanced_data = pd.DataFrame()
