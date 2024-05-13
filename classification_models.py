@@ -14,7 +14,7 @@ from keras.layers import Flatten, Dense, Dropout, BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
 from hampel import hampel
-import networkx as nx
+#import networkx as nx
 import matplotlib.pyplot as plt
 
 ##Bayesian NetWork Creation

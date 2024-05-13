@@ -51,20 +51,23 @@ def window_data(time_step,overlap,df):
 def normal_data_Standard(df):
     scaler = StandardScaler()
     cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
-    df[cols] = scaler.fit_transform(df[cols])
+    newdf=df.copy()
+    newdf[cols] = scaler.fit_transform(newdf[cols])
     return df
 
 def normal_data_MinMax(df):
     scaler = MinMaxScaler()
     cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
-    df[cols] = scaler.fit_transform(df[cols])
-    return df
+    newdf=df.copy()
+    newdf[cols] = scaler.fit_transform(newdf[cols])
+    return newdf
 
 
 def rolling_means(df,k=20):
     cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
-    df[cols].rolling(k).mean()
-    new_df=df[k-1:].reset_index(drop=True)
+    newdf=df.copy()
+    newdf[cols]=newdf[cols].rolling(k).mean()
+    new_df=newdf[k-1:].reset_index(drop=True)
     return new_df
 
 

@@ -1,4 +1,4 @@
-from sklearn.cluster import MiniBatchKMeans,KMeans,HDBSCAN
+from sklearn.cluster import MiniBatchKMeans,KMeans,HDBSCAN,DBSCAN,Birch
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import silhouette_score
@@ -57,14 +57,23 @@ def try_dbscan(data,labels):
 
     X_train_std = StandardScaler().fit_transform(data)
     
-    sbs = HDBSCAN(n_jobs=-1,min_samples=50,cluster_selection_epsilon=1.0)
-    sbs.fit(X_train_std)
+    dbs = DBSCAN(n_jobs=-1,min_samples=50,eps=1)
+    dbs.fit(X_train_std)
 
    
-    print(silhouette_score(X_train_std, sbs.labels_))
+    print(f'DBSCAN silouette score --->{silhouette_score(X_train_std, dbs.labels_)}')
 
-    df = pd.DataFrame({'real_labels': labels, 'clusters': sbs.labels_})
+    df = pd.DataFrame({'real_labels': labels, 'clusters': dbs.labels_})
 
-    return sbs.labels_,df
+    return dbs.labels_,df
 
     
+def try_birch(data,labels):
+    X_train_std = StandardScaler().fit_transform(data)
+    birch = Birch(n_clusters=12,threshold = 0.01,branching_factor=5)
+    birch.fit(X_train_std)
+    print(f'BIRCH silouette score --->{silhouette_score(X_train_std, birch.labels_)}')
+
+    df = pd.DataFrame({'real_labels': labels, 'clusters': birch.labels_})
+
+    return birch.labels_,df
