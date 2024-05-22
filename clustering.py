@@ -1,4 +1,4 @@
-from sklearn.cluster import MiniBatchKMeans,KMeans,HDBSCAN,DBSCAN,Birch
+from sklearn.cluster import MiniBatchKMeans,KMeans,DBSCAN,Birch
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import silhouette_score
@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler,StandardScaler
 import pandas as pd
 import numpy as np
 
-def try_kmeans(data,labels):
+def kmeans(data,labels):
     x=data
     y=labels
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.5)
@@ -29,51 +29,40 @@ def try_kmeans(data,labels):
      
 
 
-def try_minibatch_kmeans(data,labels,clusters):
-    x=data
-    y=labels
-    inertias = []
-    silhouette_scores = []
-    
-    X_train_std = StandardScaler().fit_transform(data)
-    
+def minibatch_kmeans(data,labels,clusters):
+        
     mbk = MiniBatchKMeans(init ='k-means++',max_iter=20, n_clusters = clusters,
-                            batch_size = 2048, n_init = 10,
+                            batch_size = 512, n_init = 10,
                             max_no_improvement = 10, verbose = 0)
-    mbk.fit(X_train_std)
+    mbk.fit(data)
 
-   
-    print(silhouette_score(X_train_std, mbk.labels_))
+    silhouette_score_val=silhouette_score(data, mbk.labels_)
+    print(silhouette_score_val)
  
     df = pd.DataFrame({'real_labels': labels, 'clusters': mbk.labels_})
 
-    return mbk.labels_,df
+    return mbk.labels_,df,silhouette_score_val
 
-def try_dbscan(data,labels):
-    x=data
-    y=labels
-    inertias = []
-    silhouette_scores = []
-
-    X_train_std = StandardScaler().fit_transform(data)
-    
-    dbs = DBSCAN(n_jobs=-1,min_samples=50,eps=1)
-    dbs.fit(X_train_std)
-
+def dbscan(data,labels):
    
-    print(f'DBSCAN silouette score --->{silhouette_score(X_train_std, dbs.labels_)}')
+    dbs = DBSCAN(n_jobs=-1,min_samples=50,eps=1)
+    dbs.fit(data)
+
+    silhouette_score_val=silhouette_score(data, dbs.labels_)
+    print(f'DBSCAN silouette score --->{silhouette_score_val}')
 
     df = pd.DataFrame({'real_labels': labels, 'clusters': dbs.labels_})
 
-    return dbs.labels_,df
+    return dbs.labels_,df,silhouette_score_val
 
     
-def try_birch(data,labels):
-    X_train_std = StandardScaler().fit_transform(data)
-    birch = Birch(n_clusters=12,threshold = 0.01,branching_factor=5)
-    birch.fit(X_train_std)
-    print(f'BIRCH silouette score --->{silhouette_score(X_train_std, birch.labels_)}')
+def birch(data,labels,clusters,th,bf):
+   
+    birch = Birch(n_clusters=clusters,threshold = th,branching_factor=bf)
+    birch.fit(data)
+    silhouette_score_val=silhouette_score(data, birch.labels_)
+    print(f'BIRCH silouette score --->{silhouette_score_val}')
 
     df = pd.DataFrame({'real_labels': labels, 'clusters': birch.labels_})
 
-    return birch.labels_,df
+    return birch.labels_,df,silhouette_score_val
