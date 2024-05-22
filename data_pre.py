@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 import scipy.stats as stats
 from sklearn.decomposition import PCA
-from scipy.stats import anderson
 from scipy.stats import pearsonr
-from hampel import hampel     ##rolling means 1st
 
+cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
 def create_dataframe():
     folder_path='harth/'
     files = os.listdir(folder_path)
@@ -30,7 +29,7 @@ def create_dataframe():
 
 
 def window_data(time_step,overlap,df):
-
+    
     step = time_step - overlap
     windows = []
     labels = []
@@ -47,24 +46,20 @@ def window_data(time_step,overlap,df):
         labels.append(label)
     return windows,labels    
 
-
 def normal_data_Standard(df):
     scaler = StandardScaler()
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
     newdf=df.copy()
     newdf[cols] = scaler.fit_transform(newdf[cols])
-    return df
+    return newdf
 
 def normal_data_MinMax(df):
-    scaler = MinMaxScaler()
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
+    scaler = MinMaxScaler(feature_range=(-1, 1))
     newdf=df.copy()
     newdf[cols] = scaler.fit_transform(newdf[cols])
     return newdf
 
 
 def rolling_means(df,k=20):
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
     newdf=df.copy()
     newdf[cols]=newdf[cols].rolling(k).mean()
     new_df=newdf[k-1:].reset_index(drop=True)
@@ -86,27 +81,8 @@ def get_balanced_dataset(df,k=7000):
     print(balanced_data.shape)
     return balanced_data
 
-def test_normality_anderson(df):
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
-    print(f"{'DISTRIBUTION':<15}{'%sig':<10}{'stat':<12}{'crit-val':<10}"
-      f"{'result':<10}\n")
-
-# Loop through all continuous random variables and test them
-    for var in cols:
-        test = anderson(df[var])
-        # Loop through test results and unpack the sig.levels and crit-vals
-        for i in range(len(test.critical_values)):
-            sig_lev, cv = test.significance_level[i], test.critical_values[i]
-            # Check if test.stat is < crit-val
-            result = 'Fail to reject' if test.statistic < cv else 'Reject'
-            # Print results in tabular format
-            print(f"{var:<15}{sig_lev:<10}{test.statistic:<12.3f}{cv:<10}"
-                f"{result:<10}")  
-            if i is 4:
-                print('\n')
 
 def correlation_analysis(df):
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
     # Set header for tabular output
     print(f"{'RANDOM VARIABLES':<25}{'corr':<10}{'p-value':<10}\n")
     # Iterate over continuous features list
@@ -129,7 +105,6 @@ def correlation_analysis(df):
             
 
 def descritize_by_bounds(df):
-    cols=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
     num_stdv = 1
 # Create bounds for continuous labels
     for col in df.columns:
@@ -165,3 +140,29 @@ def data_agg(df,chuck_size=100):
     df_aggregated = pd.concat(aggregated_dfs, axis=1).T
 
     return df_aggregated
+
+def remove_duplicates(df):
+    dup=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
+    dup2=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z','label']
+    dfr=df[dup2].copy()
+    dfr.drop_duplicates(inplace=True)
+    return dfr
+
+def remove_outliersIQR(data,multiplier=1.5,quan1=0.25,quan3=0.75):
+    df=data.copy()
+    for column in cols:
+        Q1 = df[column].quantile(quan1)
+        Q3 = df[column].quantile(quan3)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - multiplier * IQR
+        upper_bound = Q3 + multiplier * IQR
+
+        initial_count = df.shape[0]
+        
+        # Filter out the outliers
+        df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+        final_count = df.shape[0]
+        
+        print(f"  Removed {initial_count - final_count} outliers")
+
+    return df
