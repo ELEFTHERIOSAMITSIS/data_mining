@@ -14,13 +14,17 @@ def create_dataframe():
     dfs = []
     for file in files:
         df = pd.read_csv( os.path.join(folder_path, file))
-        participant_id = os.path.splitext(file)[0] 
+        participant_id = os.path.splitext(file)[0]
         df['Participant_ID'] = participant_id
-        if file=='S006':
-            df['Timestamp'] = pd.to_datetime(df['Timestamp']) + pd.Timedelta(milliseconds=1)
+        if participant_id=='S020' or participant_id=='S006':
+            df['timestamp'] = pd.to_datetime(df['timestamp']).apply(lambda ts: ts.normalize())
+            milliseconds_to_add = 20  
+            for i in range(len(df)):
+                df.at[i, 'timestamp'] = df.at[i, 'timestamp'] + pd.Timedelta(milliseconds=milliseconds_to_add * (i + 1))
+    
         dfs.append(df)
     dataset=pd.concat(dfs)
-    dataset.reset_index
+    dataset.reset_index(drop=True, inplace=True)
     dataset.loc[dataset['label'] == 13, 'label'] = 9
     dataset.loc[dataset['label'] == 14, 'label'] = 10
     dataset.loc[dataset['label'] == 130, 'label'] = 11
