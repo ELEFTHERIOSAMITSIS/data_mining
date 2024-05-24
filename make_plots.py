@@ -188,3 +188,18 @@ def boxplot(df,n):
         sns.boxplot(x=df[column])#[0:n])
         plt.title(f'Box plot of {column}')
         plt.show()
+
+
+def mean_and_std(data):
+    df=data[['back_x', 'back_y', 'back_z','thigh_x','thigh_y','thigh_z']].copy()
+    mean = df.mean()
+
+    std_dev = df.std()
+
+    plt.figure(figsize=(12, 8))
+    plt.bar(mean.index, mean, yerr=std_dev, capsize=5, color='skyblue', alpha=0.7, label='Mean')
+    plt.xlabel('Features')
+    plt.ylabel('Values')
+    plt.title('Mean and Standard Deviation of Dataset Features')
+    plt.legend()
+    plt.show()
