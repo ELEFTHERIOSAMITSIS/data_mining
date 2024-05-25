@@ -110,6 +110,7 @@ def correlation_analysis(df):
 
 def descritize_by_bounds(df):
     num_stdv = 1
+    df = df.copy()
 # Create bounds for continuous labels
     for col in df.columns:
         if col in cols:
