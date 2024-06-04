@@ -9,11 +9,9 @@ import graphviz
 import tensorflow as tf
 from tensorflow import keras
 from keras import Sequential
-from keras.layers import Flatten, Dense, Dropout, BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Flatten, Dense, Dropout
+from keras.layers import Conv2D
 from keras.optimizers import Adam
-from keras.metrics import Precision, Recall
-
 
 ##Bayesian NetWork Creation
 def bay_net_structure(data):
@@ -50,9 +48,10 @@ def bay_net_structure(data):
 #Random Forest Algorithm
 def random_forest(data,labels):
     x=data
+    y =labels
     y=labels
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    rf = RandomForestClassifier(criterion='entropy',min_samples_leaf=50)
+    rf = RandomForestClassifier(criterion='entropy',min_samples_leaf=50,n_estimators=200)
     rf.fit(X_train, y_train)
     y_pred = rf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
@@ -71,27 +70,36 @@ def random_forest(data,labels):
         return graph
 
 
+
 #2D Convolutional Neural Network
 def nn(data,labels):
     x=data
-    y=labels
+    y=labels-1
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    print(X_train[0].shape)
+    print(X_train.shape)
     print(y_train.shape)
    
     model = Sequential()
-    model.add(Conv2D(16, (2, 2), activation = 'relu', input_shape = X_train[0].shape))
+    model.add(Conv2D(32, (2, 2), activation = 'relu', input_shape = X_train[0].shape))
+    
+
     model.add(Dropout(0.1))
 
-    model.add(Conv2D(32, (2, 2), activation='relu'))
+    model.add(Conv2D(64, (2, 2), activation='relu'))
+    
+
     model.add(Dropout(0.2))
+
+    model.add(Conv2D(128, (2, 2), activation='relu'))
+    
+    model.add(Dropout(0.3))
 
     model.add(Flatten())
 
     model.add(Dense(128, activation = 'relu'))
     model.add(Dropout(0.5))
 
-    model.add(Dense(16, activation='softmax'))
+    model.add(Dense(12, activation='softmax'))
         
 
     

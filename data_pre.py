@@ -1,7 +1,5 @@
 import pandas as pd
 import os
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 import scipy.stats as stats
 from sklearn.decomposition import PCA
@@ -87,7 +85,6 @@ def get_balanced_dataset(df,k=7000):
 
 
 def correlation_analysis(df):
-    # Set header for tabular output
     print(f"{'RANDOM VARIABLES':<25}{'corr':<10}{'p-value':<10}\n")
     # Iterate over continuous features list
     for i in range(len(cols)):
@@ -111,7 +108,6 @@ def correlation_analysis(df):
 def descritize_by_bounds(df):
     num_stdv = 1
     df = df.copy()
-# Create bounds for continuous labels
     for col in df.columns:
         if col in cols:
             col_mean = df[col].mean()
@@ -123,28 +119,6 @@ def descritize_by_bounds(df):
             df[col] = pd.cut(df[col], bins=bins, labels=['very low', 'low', 'avg', 'high', 'very high'])
 
     return df
-
-
-
-def data_agg(df,chuck_size=100):
-    total_chunks = len(df) // chuck_size
-
-    # Initialize an empty DataFrame to store aggregated data
-    aggregated_dfs = []
-    # Iterate through each chunk
-    for i in range(total_chunks):
-        # Select the chunk of rows
-        start_index = i * chuck_size
-        end_index = (i + 1) * chuck_size
-        df_chunk = df.iloc[start_index:end_index]
-
-        # Calculate the mean for each column in the chunk
-        chunk_mean = df_chunk.mean()
-        # Append the chunk mean to the aggregated DataFrame
-        aggregated_dfs.append(chunk_mean)
-    df_aggregated = pd.concat(aggregated_dfs, axis=1).T
-
-    return df_aggregated
 
 def remove_duplicates(df):
     dup=['back_x','back_y','back_z','thigh_x','thigh_y','thigh_z']
